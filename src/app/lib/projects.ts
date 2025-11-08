@@ -327,28 +327,36 @@ export function loadProjects(): Project[] {
       if (Array.isArray(rows) && rows.length) {
         // Labels from category.md if present
         const categoryInfo = parseCategoryFile();
-        // Docs links from protocols
+        // Docs links from local overrides file and src data files (optional)
         const docsMap = new Map<string, string>();
         try {
-          const protoRoots = [
-            path.resolve(process.cwd(), "protocols", "testnet"),
-            path.resolve(process.cwd(), "protocols", "mainnet"),
-          ];
-          for (const root of protoRoots) {
-            try {
-              if (!fs.existsSync(root)) continue;
-              const entries = fs.readdirSync(root).filter((f) => f.toLowerCase().endsWith(".json"));
-              for (const file of entries) {
-                try {
-                  const full = path.join(root, file);
-                  const json = JSON.parse(fs.readFileSync(full, "utf8"));
-                  const pname: string = json.name ?? file.replace(/\.json$/i, "");
-                  const norm = normalizeName(pname);
-                  const durl: string | undefined = json.links?.docs;
-                  if (durl) docsMap.set(norm, durl);
-                } catch {}
-              }
-            } catch {}
+          const ovr = (overridesRaw as Array<{ name: string; docsUrl?: string }>);
+          for (const o of ovr) {
+            if (!o?.name) continue;
+            if (o.docsUrl) docsMap.set(normalizeName(o.name), String(o.docsUrl));
+          }
+        } catch {}
+        try {
+          const docsOverridesPath = path.resolve(process.cwd(), "src", "data", "docs_overrides.json");
+          if (fs.existsSync(docsOverridesPath)) {
+            let txt = fs.readFileSync(docsOverridesPath, "utf8");
+            if (txt.charCodeAt(0) === 0xfeff) txt = txt.slice(1);
+            const obj = JSON.parse(txt) as Record<string, string>;
+            for (const [k, v] of Object.entries(obj)) {
+              if (!k || !v) continue;
+              const val = /^https?:\/\//i.test(v) ? v : `https://${v}`;
+              docsMap.set(normalizeName(k), val);
+            }
+          }
+        } catch {}
+        try {
+          const srcProjectsPath = path.resolve(process.cwd(), "src", "data", "projects.json");
+          if (fs.existsSync(srcProjectsPath)) {
+            const arr = JSON.parse(fs.readFileSync(srcProjectsPath, "utf8")) as Array<{ name: string; docsUrl?: string }>;
+            for (const p of arr) {
+              if (!p?.name) continue;
+              if (p.docsUrl) docsMap.set(normalizeName(p.name), String(p.docsUrl));
+            }
           }
         } catch {}
 
@@ -500,7 +508,6 @@ export function loadProjects(): Project[] {
               url: url ?? "#",
               docsUrl: docsMap.get(normalizeName(name)),
               logo,
-              logoCandidates,
               category,
               tags: [],
               labels,
@@ -568,7 +575,6 @@ export function loadProjects(): Project[] {
           url,
           docsUrl: docsMap.get(normName),
           logo,
-          logoCandidates,
           category,
           tags: [],
           labels,
@@ -634,15 +640,15 @@ export function loadProjects(): Project[] {
           const eco = ecoMap.get(norm);
           const mergedUrl = (!p.url || p.url === "#") ? (eco?.web ?? urlMap.get(norm) ?? p.url) : p.url;
           const generated = makeLogoCandidates(mergedUrl, undefined, undefined, p.id);
-          const existing = Array.isArray(p.logoCandidates) ? p.logoCandidates : [];
           const merged: string[] = [];
-          // Put eco logo first if provided
           if (eco?.logo) merged.push(eco.logo);
-          for (const s of [...existing, ...generated]) {
+          for (const s of generated) {
             if (s && !merged.includes(s)) merged.push(s);
           }
           const logo = p.logo ?? eco?.logo ?? merged[0];
-          return { ...p, url: mergedUrl ?? p.url, logo, logoCandidates: merged } as Project;
+          const rest: any = { ...(p as any) };
+          if ("logoCandidates" in rest) delete rest.logoCandidates;
+          return { ...rest, url: mergedUrl ?? p.url, logo } as Project;
         });
         // Augment from category.md + monad-ecosystem URLs without touching existing ones
         const categoryInfo = parseCategoryFile();
@@ -673,7 +679,6 @@ export function loadProjects(): Project[] {
             url,
             docsUrl: undefined,
             logo,
-            logoCandidates,
             category,
             tags: [],
             labels,
@@ -726,7 +731,6 @@ export function loadProjects(): Project[] {
               url: projectUrl ?? "#",
               docsUrl,
               logo,
-              logoCandidates,
               category,
               tags: [],
               labels: labels.length ? labels : undefined,
@@ -764,7 +768,6 @@ export function loadProjects(): Project[] {
                 url,
                 docsUrl: undefined,
                 logo,
-                logoCandidates,
                 category,
                 tags: [],
                 labels,
