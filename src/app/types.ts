@@ -1,11 +1,4 @@
-export type Category =
-  | "DEX"
-  | "Lending"
-  | "NFT"
-  | "Infrastructure"
-  | "Wallet"
-  | "Analytics"
-  | "Other";
+export type Category = string;
 
 export type Network = "Monad Mainnet" | "Monad Testnet";
 
@@ -19,13 +12,14 @@ export interface Project {
   docsUrl?: string;
   logo?: string;
   category: Category;
-  network: Network;
+  network?: Network;
   tags: Tag[];
+  labels?: string[];
 }
 
 export interface Filters {
   search: string;
   categories: Set<Category>;
-  networks: Set<Network>;
   tags: Set<Tag>;
+  labels: Set<string>;
 }

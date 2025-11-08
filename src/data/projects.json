@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "name": "MonadSwap",
+    "description": "A fast, low-fee decentralized exchange on Monad.",
+    "url": "https://monadswap.xyz",
+    "docsUrl": "https://docs.monadswap.xyz",
+    "logo": "/monadswap.png",
+    "category": "DEX",
+    "network": "Monad Testnet",
+    "tags": ["New", "Trending"]
+  },
+  {
+    "id": "2",
+    "name": "MonoLend",
+    "description": "Lending and borrowing markets for Monad assets.",
+    "url": "https://monolend.app",
+    "docsUrl": "https://docs.monolend.app",
+    "logo": "/monolend.png",
+    "category": "Lending",
+    "network": "Monad Testnet",
+    "tags": ["Audited"]
+  },
+  {
+    "id": "3",
+    "name": "MonoWallet",
+    "description": "A secure, user-friendly wallet for Monad.",
+    "url": "https://monowallet.io",
+    "logo": "/monowallet.png",
+    "category": "Wallet",
+    "network": "Monad Mainnet",
+    "tags": ["New"]
+  }
+]

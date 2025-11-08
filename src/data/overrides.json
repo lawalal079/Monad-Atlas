@@ -1,0 +1,11 @@
+[
+  {
+    "name": "MonadExplorer by BlockVision",
+    "description": "An explorer for Monad testnet by BlockVision.",
+    "category": "Infrastructure",
+    "network": "Monad Testnet",
+    "tags": ["Trending"],
+    "docsUrl": "https://docs.monadexplorer.com",
+    "logo": "/logos/monadexplorer.png"
+  }
+]
